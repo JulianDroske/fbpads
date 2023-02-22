@@ -13,6 +13,9 @@
 #include "conf.h"
 #include "fbpad.h"
 
+/* avoid compiler's unused result warning */
+#define write(a,b,c) ((void)!write(a,b,c))
+
 #define MODE_CURSOR		0x01
 #define MODE_WRAP		0x02
 #define MODE_ORIGIN		0x04
@@ -86,6 +89,10 @@ static int clrmap(int c)
 	return (g << 16) | (g << 8) | g;
 }
 
+int term_clrmap(int c){
+	return clrmap(c);
+}
+
 /* low level drawing and lazy updating */
 
 static int fgcolor(void)
@@ -103,6 +110,13 @@ static int bgcolor(void)
 	return mode & ATTR_REV ? fg : bg;
 }
 
+void term_setfgcolor(int color){
+	fg = clrmap(color);
+}
+void term_setbgcolor(int color){
+	bg = clrmap(color);
+}
+
 /* assumes visible && !lazy */
 static void _draw_pos(int r, int c, int cursor)
 {
@@ -116,8 +130,8 @@ static void _draw_pos(int r, int c, int cursor)
 /* assumes visible && !lazy */
 static void _draw_row(int r)
 {
-	int cbg, cch;		/* current background and character */
-	int fbg, fsc = -1;	/* filling background and start column */
+	int cbg = 0, cch = 0;		/* current background and character */
+	int fbg = 0, fsc = -1;	/* filling background and start column */
 	int i;
 	/* call pad_fill() only once for blank columns with identical backgrounds */
 	for (i = 0; i < pad_cols(); i++) {
@@ -170,6 +184,11 @@ static void draw_char(int ch, int r, int c)
 	bgs[i] = bgcolor();
 	if (candraw(r, r + 1))
 		_draw_pos(r, c, 0);
+}
+
+void term_drawchar(int ch, int r, int c)
+{
+	draw_char(ch, r, c);
 }
 
 static void draw_cursor(int put)
@@ -333,7 +352,7 @@ void term_read(void)
 	lazy_flush();
 }
 
-static void term_reset(void)
+/*static*/ void term_reset(void)
 {
 	row = col = 0;
 	top = 0;
@@ -700,6 +719,10 @@ static void move_cursor(int r, int c)
 	mode = BIT_SET(mode, MODE_WRAPREADY, 0);
 }
 
+void term_movecursor(int r, int c){
+	move_cursor(r, c);
+}
+
 static void set_region(int t, int b)
 {
 	top = LIMIT(t - 1, 0, pad_rows() - 1);
@@ -815,6 +838,9 @@ static void insertchar(int c)
 		advance(0, 1, 1);
 }
 
+void term_insertchar(int c){
+	insertchar(c);
+}
 
 /* partial vt102 implementation */
 

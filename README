@@ -1,3 +1,12 @@
+FBPAD-static: JuRt's Edition
+============================
+This project is based on FBPAD originally by aligrudi
+with folllowing changes:
+[x] statically linked with static font, for any linux kernel
+[x] remove inline functions, replaced with a single loader for one program
+[x] provides a library interface
+--------------------------------------------------------
+
 FBPAD
 =====
 

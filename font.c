@@ -25,6 +25,26 @@ struct tinyfont {
 	int rows, cols;	/* glyph dimensions */
 };
 
+struct font *font_open_static(char *data)
+{
+	struct font *font;
+	struct tinyfont head = *(struct tinyfont*) data;
+	int offset = sizeof(head);
+	font = malloc(sizeof(*font));
+	font->n = head.n;
+	font->rows = head.rows;
+	font->cols = head.cols;
+	font->glyphs = (int*)(data+offset);
+	offset += font->n * sizeof(int);
+	font->data = data+offset;
+	offset += font->n * font->rows * font->cols;
+	if (!font->glyphs || !font->data) {
+		// font_free(font);
+		return NULL;
+	}
+	return font;
+}
+
 static void *xread(int fd, int len)
 {
 	void *buf = malloc(len);
@@ -34,7 +54,7 @@ static void *xread(int fd, int len)
 	return NULL;
 }
 
-struct font *font_open(char *path)
+struct font *font_open(char* path)
 {
 	struct font *font;
 	struct tinyfont head;

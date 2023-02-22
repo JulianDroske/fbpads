@@ -1,3 +1,5 @@
+#include "jurt.h"
+
 /* list of tags */
 #define TAGS		"xnlhtr01uiva "
 #define TAGS_SAVED	""
@@ -10,14 +12,23 @@
 /* TERM variable for launched programs */
 #define TERM		"linux"
 
+/* tinyfont names, specially for fbpads */
+#define TFR		ar_tf
+#define TFI		ai_tf
+#define TFB		ab_tf
+
+# define FR		(&JL_IMPORTF_PREV_START(TFR))
+# define FI		(&JL_IMPORTF_PREV_START(TFI))
+# define FB		(&JL_IMPORTF_PREV_START(TFB))
+
 /* tinyfont files for regular, italic, and bold fonts */
-#define FR		"/path/to/font.tf"
-#define FI		NULL
-#define FB		NULL
+# define FR_PATH		"./ar.tf"
+# define FI_PATH		"./ai.tf"
+# define FB_PATH		"./ai.tf"
 
 /* foreground and background colors */
-#define FGCOLOR		COLOR0
-#define BGCOLOR		COLORF
+#define FGCOLOR		COLORF
+#define BGCOLOR		COLOR0
 
 /* where to write the screen shot */
 #define SCRSHOT		"/tmp/scr"

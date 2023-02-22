@@ -16,3 +16,8 @@ int fb_cols(void);
 char *fb_dev(void);
 void fb_cmap(void);
 unsigned fb_val(int r, int g, int b);
+
+int fb_fd();
+struct fb_var_screeninfo fb_vscreeninfo();
+void fb_setypan(int iy);
+

@@ -2,6 +2,7 @@
  * FBPAD FRAMEBUFFER VIRTUAL TERMINAL
  *
  * Copyright (C) 2009-2021 Ali Gholami Rudi <ali at rudi dot ir>
+ * Copyright (C) 2021-2023 Julian Droske <juliandroske at outlook dot com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -31,6 +32,9 @@
 #include "conf.h"
 #include "fbpad.h"
 #include "draw.h"
+
+/* avoid compiler's unused result warning */
+#define write(a,b,c) ((void)!write(a,b,c))
 
 #define CTRLKEY(x)	((x) - 96)
 #define POLLFLAGS	(POLLIN | POLLHUP | POLLERR | POLLNVAL)
@@ -234,7 +238,7 @@ static void directkey(void)
 	if (PASS && locked) {
 		if (c == '\r') {
 			pass[passlen] = '\0';
-			if (!strcmp(PASS, pass))
+			if (!strcmp(PASS?PASS:"", pass))	// to avoid non null warning
 				locked = 0;
 			passlen = 0;
 			return;

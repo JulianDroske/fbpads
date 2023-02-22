@@ -17,6 +17,7 @@ static struct fb_fix_screeninfo finfo;	/* linux-specific FB structure */
 static char fbdev[1024];		/* FB device */
 static int fd;				/* FB device file descriptor */
 static void *fb;			/* mmap()ed FB memory */
+static void *pfb;			/* panned FB start addr */
 static int bpp;				/* bytes per pixel */
 static int nr, ng, nb;			/* color levels */
 static int rl, rr, gl, gr, bl, br;	/* shifts per color */
@@ -87,6 +88,19 @@ static void init_colors(void)
 	bl = vinfo.blue.offset;
 }
 
+int fb_fd()
+{
+	return fd;
+}
+
+struct fb_var_screeninfo fb_vscreeninfo(){
+	return vinfo;
+}
+
+void fb_setypan(int iy){
+	pfb = fb + iy * finfo.line_length * vinfo.yres;
+}
+
 int fb_init(char *dev)
 {
 	char *path = dev ? dev : FBDEV;
@@ -108,6 +122,7 @@ int fb_init(char *dev)
 	fb = mmap(NULL, fb_len(), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	if (fb == MAP_FAILED)
 		goto failed;
+	pfb = fb;
 	init_colors();
 	fb_cmap_save(1);
 	fb_cmap();
@@ -137,7 +152,7 @@ int fb_cols(void)
 
 void *fb_mem(int r)
 {
-	return fb + (r + vinfo.yoffset + yoff) * finfo.line_length + (vinfo.xoffset + xoff) * bpp;
+	return pfb + (r + vinfo.yoffset + yoff) * finfo.line_length + (vinfo.xoffset + xoff) * bpp;
 }
 
 unsigned fb_val(int r, int g, int b)

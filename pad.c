@@ -15,9 +15,26 @@ static struct font *fonts[3];
 static int gc_init(void);
 static void gc_free(void);
 
+extern char JL_IMPORTF_PREV_START(TFR);
+extern char JL_IMPORTF_PREV_START(TFI);
+extern char JL_IMPORTF_PREV_START(TFB);
+
+int pad_init_static(void)
+{
+	if (pad_font_static(FR, FI, FB))
+		return 1;
+	if (gc_init())
+		return 1;
+	rows = fb_rows() / fnrows;
+	cols = fb_cols() / fncols;
+	bpp = FBM_BPP(fb_mode());
+	pad_conf(0, 0, fb_rows(), fb_cols());
+	return 0;
+}
+
 int pad_init(void)
 {
-	if (pad_font(FR, FI, FB))
+	if (pad_font(FR_PATH, FI_PATH, FB_PATH))
 		return 1;
 	if (gc_init())
 		return 1;
@@ -40,11 +57,7 @@ void pad_conf(int roff, int coff, int _rows, int _cols)
 
 void pad_free(void)
 {
-	int i;
 	gc_free();
-	for (i = 0; i < 3; i++)
-		if (fonts[i])
-			font_free(fonts[i]);
 }
 
 #define CR(a)		(((a) >> 16) & 0x0000ff)
@@ -218,6 +231,20 @@ int pad_rows(void)
 int pad_cols(void)
 {
 	return cols;
+}
+
+// receives raw data instead of file path
+int pad_font_static(char *fr, char *fi, char *fb)
+{
+	struct font *r = fr ? font_open_static(fr) : NULL;
+	if (!r)
+		return 1;
+	fonts[0] = r;
+	fonts[1] = fi ? font_open_static(fi) : NULL;
+	fonts[2] = fb ? font_open_static(fb) : NULL;
+	fnrows = font_rows(fonts[0]);
+	fncols = font_cols(fonts[0]);
+	return 0;
 }
 
 int pad_font(char *fr, char *fi, char *fb)
